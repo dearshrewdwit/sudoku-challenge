@@ -1,15 +1,16 @@
+require_relative 'cell'
+
 class Grid
 
   attr_reader :grid, :num_string, :values, :cells
 
   def initialize(puzzle)
     @cells = puzzle.split('').map { |value| Cell.new(value) }
-    @grid = cells.each_slice(9).to_a
     @values = ['1','2','3','4','5','6','7','8','9']
   end
 
   def num_string
-    grid.flatten.map { |cell| cell.value }.join
+    cells.map { |cell| cell.value }.join
   end
 
   def solve
@@ -19,9 +20,9 @@ class Grid
         if candidates.length == 1
           cell.value = candidates[0]
         end
-        return "solved" if solved?
       end
     }
+    solved? ?  "solved" : solve
   end
 
   def print_box
