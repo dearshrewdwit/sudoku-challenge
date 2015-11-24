@@ -2,7 +2,7 @@ require_relative 'cell'
 
 class Grid
 
-  attr_reader :grid, :num_string, :values, :cells
+  attr_reader :values, :cells
 
   def initialize(puzzle)
     @cells = puzzle.split('').map { |value| Cell.new(value) }
@@ -25,9 +25,11 @@ class Grid
     solved? ?  "solved" : solve
   end
 
-  def print_box
-    cells.map { |i| i.value }
+  def solved?
+    !num_string.include?('0')
   end
+
+  private
 
   def boxes_by_index
   [0, 3, 6, 27, 30, 33, 54, 57, 60].map { |i|
@@ -66,10 +68,6 @@ class Grid
   def get_column(index)
     column2 = column_by_index.select { |column| column.include?(index) }
     column2.flatten.map { |i| num_string[i] }
-  end
-
-  def solved?
-    !num_string.include?('0')
   end
 
 end
