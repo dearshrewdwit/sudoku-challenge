@@ -22,7 +22,7 @@ class Grid
         end
       end
     }
-    solved? ?  "solved" : solve
+    solved? ? (p "solved #{num_string}") : solve
   end
 
   def solved?
