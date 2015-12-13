@@ -29,6 +29,16 @@ class Grid2
     hard_solve unless solved?
   end
 
+  def keep_trying_easy_solve
+    outstanding_before, looping = SIZE, false
+    while !solved? && !looping
+      easy_solve
+      outstanding        = @cells.count { |each_cell| !each_cell.filled? }
+      looping            = outstanding_before == outstanding
+      outstanding_before = outstanding
+    end
+  end
+
   def easy_solve
     cells.each_with_index { |cell, index|
       unless cell.filled?
@@ -40,18 +50,53 @@ class Grid2
   end
 
   def hard_solve
-    cells.each_with_index { |cell, index|
+    cells.each_with_index do |cell, index|
       unless cell.filled?
         cands = candidates_at(index)
-        cands.each { |guess|
+        cands.each do |guess|
           cell.value = guess
           new_grid = Grid2.new(num_string)
           new_grid.solve
-          p "solved: #{new_grid.num_string}" and return if new_grid.solved?
-        }
+          p "solved: #{new_grid.num_string}"
+          if new_grid.solved?
+            self.num_string = new_grid.num_string
+            return
+          end
+        end
       end
-    }
+    end
 
+  end
+
+
+  def hard_solve2
+    # cells.map.with_index{|cell, index| [cell, index]}.select{|cell_index_pair| !cell_index_pair.first.filled? && candidates_at(cell_index_pair.last) > 1}.map{|cell_index_pair| cell_index_pair.push(candidates_at(cell_index_pair.last).length)}.sort {|a,b| a.last <=> b.last }.first.first
+    guess_cell = easiest_cell_to_solve_with_index(cells).first
+    guess_cell_index = easiest_cell_to_solve_with_index(cells).last
+    candidates_at(guess_cell_index).each do |cand|
+      guess_cell.value = cand
+
+    end
+  end
+
+  def map_index_onto_cell(cells_array)
+    cells_array.map.with_index{|cell, index| [cell, index]}
+  end
+
+  def select_unfilled_hard_cells(cells_array)
+    map_index_onto_cell(cells_array).select{|cell_index_pair| !cell_index_pair.first.filled? && candidates_at(cell_index_pair.last) > 1}
+  end
+
+  def append_candidates_count(cells_array)
+    select_unfilled_hard_cells(cells_array).map{|cell_index_pair| cell_index_pair.push(candidates_at(cell_index_pair.last).length)}
+  end
+
+  def sort_cells_by_candidate_count(cells_array)
+    append_candidates_count(cells_array).sort{|a,b| a.last <=> b.last}
+  end
+
+  def easiest_cell_to_solve_with_index(cells_array)
+    sort_cells_by_candidate_count(cells_array).first[0..1]
   end
 
   def solved?
